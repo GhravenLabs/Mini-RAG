@@ -1,0 +1,20 @@
+name: Smoke
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Compile and run sample retrieval
+        run: |
+          python -m py_compile mini_rag.py
+          python mini_rag.py handbook.md "when can I contact support?" --k 2 > /tmp/mini-rag-output.txt
+          grep -q "Top passages" /tmp/mini-rag-output.txt
+          test -f assets/screenshot.png

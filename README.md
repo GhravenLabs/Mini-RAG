@@ -5,6 +5,12 @@ demonstrates the core **Retrieval-Augmented Generation** pattern: chunk a docume
 against a question with **TF-IDF + cosine similarity**, and return the most relevant ones. With an
 API key it also writes a grounded answer that **cites** the passages it used.
 
+![Mini-RAG screenshot](assets/screenshot.png)
+
+## Portfolio proof
+- [Case study](PORTFOLIO-CASE-STUDY.md) — how this tiny implementation explains the RAG pattern without heavy tooling.
+- GitHub Actions smoke check compiles the script and verifies a sample retrieval run on every push.
+
 ## Why it's interesting
 RAG is usually shown with heavy stacks (vector DBs, embedding APIs, LangChain). This strips it to
 the essentials so the *mechanism* is clear and it runs anywhere with just Python — no install, no
