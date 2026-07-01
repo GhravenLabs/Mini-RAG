@@ -1,0 +1,19 @@
+{
+  "_note": "Evaluation set for the finance RAG demo. in_scope = answerable from finance-handbook.md (retrieval must surface the right passage). out_of_scope = NOT in the doc (the guardrail must refuse).",
+  "in_scope": [
+    {"q": "What are the standard payment terms?", "expect_keywords": ["net 30", "payment terms"]},
+    {"q": "When is an invoice considered overdue?", "expect_keywords": ["overdue", "due date"]},
+    {"q": "How are duplicate vendor bills handled?", "expect_keywords": ["duplicate", "held", "flagged"]},
+    {"q": "What is the deadline to submit an expense claim?", "expect_keywords": ["30 days", "receipt"]},
+    {"q": "How long do refunds take to process?", "expect_keywords": ["10 business days", "refund"]},
+    {"q": "When must the month-end close be finished?", "expect_keywords": ["five business days", "close"]},
+    {"q": "What file formats are accepted for client data?", "expect_keywords": ["csv", "excel"]},
+    {"q": "What day are payment runs scheduled?", "expect_keywords": ["wednesday", "payment run"]}
+  ],
+  "out_of_scope": [
+    {"q": "What is the company's vacation and leave policy?"},
+    {"q": "How do I reset my email password?"},
+    {"q": "What health insurance plan does the company offer?"},
+    {"q": "Who won the football game last night?"}
+  ]
+}
