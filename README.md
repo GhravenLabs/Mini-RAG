@@ -49,3 +49,6 @@ retrieve → ground → cite loop is exactly this. Good base for an SMB "chat wi
 
 ## License
 MIT © Rolly Calma ([Ghraven](https://github.com/Ghraven))
+
+---
+_By **Rolly Calma** — see live demos & services at **[rollycalma.com](https://rollycalma.com/)**._
