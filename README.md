@@ -8,6 +8,7 @@ API key it also writes a grounded answer that **cites** the passages it used.
 ![Mini-RAG screenshot](assets/screenshot.png)
 
 ## Portfolio proof
+- [Live browser demo](https://mini-rag-ju6l.onrender.com/) — try the retrieval flow without cloning the repo.
 - [Case study](PORTFOLIO-CASE-STUDY.md) — how this tiny implementation explains the RAG pattern without heavy tooling.
 - GitHub Actions smoke check compiles the script and verifies a sample retrieval run on every push.
 
