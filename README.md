@@ -3,7 +3,9 @@
 A tiny **"chat with your document"** retriever in **pure Python** — zero dependencies. It
 demonstrates the core **Retrieval-Augmented Generation** pattern: chunk a document, rank passages
 against a question with **TF-IDF + cosine similarity**, and return the most relevant ones. With an
-API key it also writes a grounded answer that **cites** the passages it used.
+API key it also writes a grounded answer that **cites** the passages it used. The finance demo
+adds an evidence-term guardrail so a question is not treated as grounded just because one generic
+passage scored above the threshold.
 
 ![Mini-RAG screenshot](assets/screenshot.png)
 
@@ -38,7 +40,9 @@ Top passages:
 1. **Chunk** the document into passages (blank-line split, short chunks merged).
 2. **Index** — build TF-IDF vectors (term frequency × inverse document frequency) per passage.
 3. **Retrieve** — vectorize the question and rank passages by cosine similarity.
-4. **(Optional) Answer** — with `--ai`, send the top passages + question to the Anthropic API
+4. **Audit grounding** — the finance demo reports which meaningful question terms are actually
+   supported by the retrieved passages before allowing an answer.
+5. **(Optional) Answer** — with `--ai`, send the top passages + question to the Anthropic API
    (via `urllib`, no SDK) and get an answer constrained to cite the source passages — so it can't
    hallucinate beyond the document.
 

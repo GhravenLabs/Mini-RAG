@@ -73,6 +73,9 @@ def main():
     print("  Out-of-scope detail (must refuse):")
     for ok, score, q in grows:
         print(f"    {'REFUSED' if ok else 'LEAKED '}  top={score:.3f}  {q[:44]}")
+    print("-" * 62)
+    print("  Grounding policy:")
+    print(f"    min_score={MIN_SCORE} and min_evidence_terms={finance_rag.DEFAULT_MIN_EVIDENCE_TERMS}")
     print("=" * 62)
     overall = (hit_at_k >= 0.75 and guard_acc >= 0.75)
     print("  RESULT:", "PASS -- retrieval solid + guardrail holds" if overall else "NEEDS TUNING")
