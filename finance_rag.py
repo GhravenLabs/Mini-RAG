@@ -27,8 +27,8 @@ def build_index(doc: str):
 def evidence_terms(question: str, passages: list[tuple[float, str]]) -> list[str]:
     """Return meaningful question terms that appear in retrieved evidence."""
     query_terms = set(mini_rag.tokenize(question))
-    evidence_text = " ".join(text for _score, text in passages).lower()
-    return sorted(term for term in query_terms if term in evidence_text)
+    evidence_tokens = set(mini_rag.tokenize(" ".join(text for _score, text in passages)))
+    return sorted(query_terms & evidence_tokens)
 
 
 def answer(

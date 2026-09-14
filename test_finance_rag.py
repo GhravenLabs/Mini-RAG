@@ -1,6 +1,23 @@
 import finance_rag
 
 
+def test_unpaid_does_not_count_as_evidence_for_paid():
+    index = finance_rag.build_index("Invoices remain unpaid.")
+
+    result = finance_rag.answer("Are invoices paid?", index)
+
+    assert result["grounded"] is False
+    assert result["evidence_terms"] == ["invoices"]
+
+
+def test_evidence_matches_whole_tokens_case_insensitively():
+    result = finance_rag.evidence_terms(
+        "Are invoices paid?", [(1.0, "INVOICES: PAID!")]
+    )
+
+    assert result == ["invoices", "paid"]
+
+
 DOC = """
 ## Payment terms
 
