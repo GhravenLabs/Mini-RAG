@@ -43,10 +43,22 @@ Top passages:
 4. **Audit grounding** — the finance demo reports which meaningful question terms are actually
    supported by the retrieved passages before allowing an answer.
 5. **(Optional) Answer** — with `--ai`, send the top passages + question to the Anthropic API
-   (via `urllib`, no SDK) and get an answer constrained to cite the source passages — so it can't
-   hallucinate beyond the document.
+   (via `urllib`, no SDK) and request an answer that cites the source passages. Prompting and
+   citations do not eliminate hallucinations; verify generated claims against the document.
 
-Pure standard library: `re`, `math`, `collections`, `urllib`. No `pip install`.
+Pure standard library: `re`, `math`, `collections`, `urllib`. No `pip install` for retrieval.
+
+## Limitations and verification
+
+- Retrieval uses lexical overlap, so it can miss paraphrases or return passages that share words
+  without answering the question. The finance guardrail is a score/term heuristic, not a factuality guarantee.
+- `--ai` sends the question and retrieved passages to an external model API. Use public or synthetic
+  documents for the hosted demo; keep confidential documents out of it.
+- The browser demo may need time to wake up on its hosting service. Local retrieval works without
+  a hosted service or API key.
+- Run `python evals.py` for the bundled eight retrieval and four refusal examples. These small
+  fixture results are not evidence of general accuracy. See [the reviewer quickstart](docs/REVIEWER-QUICKSTART.md)
+  for isolated test setup.
 
 ## Real-world version
 For production you'd swap TF-IDF for embeddings + a vector store (e.g. pgvector/Chroma) — but the

@@ -12,9 +12,17 @@ Mini-RAG is a tiny pure-Python retrieval demo. It is meant to make the retrieval
 ## Local verification
 
 ```bash
-python -m pytest
-python mini_rag.py handbook.md "what is the return policy?" --k 2
+python -m venv .venv
+# Windows PowerShell; on macOS/Linux use .venv/bin/python instead.
+.venv/Scripts/python -m pip install "pytest>=8,<10"
+.venv/Scripts/python -m pytest -q
+.venv/Scripts/python mini_rag.py handbook.md "what is the return policy?" --k 2
+.venv/Scripts/python evals.py
 ```
 
 The retrieval path does not require an API key. AI answer generation is optional and should stay graceful when no key is configured.
+
+Pytest is a development dependency, not a retrieval runtime dependency. The evaluation fixture has
+eight in-scope questions and four out-of-scope questions; passing it does not guarantee correct
+answers on arbitrary documents. Review source passages yourself before relying on generated text.
 

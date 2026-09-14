@@ -18,3 +18,8 @@ jobs:
           python mini_rag.py handbook.md "when can I contact support?" --k 2 > /tmp/mini-rag-output.txt
           grep -q "Top passages" /tmp/mini-rag-output.txt
           test -f assets/screenshot.png
+      - name: Run grounding regressions and evaluation fixtures
+        run: |
+          python -m pip install 'pytest>=8,<10'
+          python -m pytest -q
+          python evals.py
