@@ -78,6 +78,8 @@ def cosine(a: dict, b: dict) -> float:
 
 
 def retrieve(query: str, chunks: list[str], vectors, idf, k: int = 3):
+    if k < 1:
+        raise ValueError("k must be a positive integer")
     qv = vectorize(query, idf)
     scored = sorted(((cosine(qv, v), i) for i, v in enumerate(vectors)),
                     key=lambda x: x[0], reverse=True)
@@ -111,6 +113,8 @@ def main(argv=None):
     ap.add_argument("--k", type=int, default=3, help="how many passages to retrieve (default 3)")
     ap.add_argument("--ai", action="store_true", help="also generate a grounded answer (needs ANTHROPIC_API_KEY)")
     args = ap.parse_args(argv)
+    if args.k < 1:
+        ap.error("--k must be a positive integer")
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:  # noqa
@@ -119,7 +123,12 @@ def main(argv=None):
     if not os.path.isfile(args.document):
         print(f"No such file: {args.document}", file=sys.stderr)
         return 2
-    doc = open(args.document, encoding="utf-8", errors="replace").read()
+    try:
+        with open(args.document, encoding="utf-8", errors="replace") as document:
+            doc = document.read()
+    except OSError as error:
+        print(f"Could not read document '{args.document}': {error}", file=sys.stderr)
+        return 2
     chunks = chunk(doc)
     vectors, idf = build_index(chunks)
     print(f"Indexed {len(chunks)} passages from {args.document}.\n")
