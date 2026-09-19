@@ -52,6 +52,9 @@ Pure standard library: `re`, `math`, `collections`, `urllib`. No `pip install` f
 
 - Retrieval uses lexical overlap, so it can miss paraphrases or return passages that share words
   without answering the question. The finance guardrail is a score/term heuristic, not a factuality guarantee.
+- Finance guardrail settings require a finite `min_score` between 0 and 1 and a nonnegative
+  integer `min_evidence_terms`; invalid values raise `ValueError`. Zero disables that threshold,
+  but a query with no matching passage still receives a refusal.
 - `--ai` sends the question and retrieved passages to an external model API. Use public or synthetic
   documents for the hosted demo; keep confidential documents out of it.
 - The browser demo may need time to wake up on its hosting service. Local retrieval works without

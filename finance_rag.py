@@ -11,6 +11,7 @@ couldn't find it. In finance you must never confidently make up a number. This i
 / "know what you don't know" behavior that the 2026 hiring research flags as the #1 cheap signal.
 """
 from __future__ import annotations
+import math
 import mini_rag  # vendored Mini-RAG engine (pure stdlib)
 
 DEFAULT_MIN_SCORE = 0.16  # tuned via evals.py (a "policy handbook" leaks generic "policy" queries at ~0.13); below this = "not in the document"
@@ -50,6 +51,12 @@ def answer(
       answer: str|None
     }
     """
+    if (isinstance(min_score, bool) or not isinstance(min_score, (int, float))
+            or not math.isfinite(min_score) or not 0 <= min_score <= 1):
+        raise ValueError("min_score must be a finite number between 0 and 1")
+    if (isinstance(min_evidence_terms, bool) or not isinstance(min_evidence_terms, int)
+            or min_evidence_terms < 0):
+        raise ValueError("min_evidence_terms must be a nonnegative integer")
     results = mini_rag.retrieve(question, index["chunks"], index["vectors"], index["idf"], k)
     top = results[0][0] if results else 0.0
     terms = evidence_terms(question, results)
