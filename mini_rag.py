@@ -79,7 +79,7 @@ def cosine(a: dict, b: dict) -> float:
 
 
 def retrieve(query: str, chunks: list[str], vectors, idf, k: int = 3):
-    if k < 1:
+    if isinstance(k, bool) or not isinstance(k, int) or k < 1:
         raise ValueError("k must be a positive integer")
     qv = vectorize(query, idf)
     scored = sorted(((cosine(qv, v), i) for i, v in enumerate(vectors)),
