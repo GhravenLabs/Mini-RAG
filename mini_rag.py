@@ -19,6 +19,7 @@ import math
 import os
 import re
 import sys
+import unicodedata
 import urllib.request
 from collections import Counter
 
@@ -27,7 +28,7 @@ STOP = set("a an the and or of to in on for is are was were be been being it its
 
 
 def tokenize(text: str) -> list[str]:
-    return [w for w in re.findall(r"[a-z0-9]+", text.lower()) if w not in STOP and len(w) > 1]
+    return [w for w in re.findall(r"[^\W_]+", unicodedata.normalize("NFC", text).casefold()) if w not in STOP and len(w) > 1]
 
 
 def chunk(doc: str) -> list[str]:
