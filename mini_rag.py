@@ -131,6 +131,9 @@ def main(argv=None):
         print(f"Could not read document '{args.document}': {error}", file=sys.stderr)
         return 2
     chunks = chunk(doc)
+    if not chunks:
+        print("Document contains no readable passages.", file=sys.stderr)
+        return 2
     vectors, idf = build_index(chunks)
     print(f"Indexed {len(chunks)} passages from {args.document}.\n")
 
