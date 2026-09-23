@@ -12,6 +12,7 @@ couldn't find it. In finance you must never confidently make up a number. This i
 """
 from __future__ import annotations
 import math
+from pathlib import Path
 import mini_rag  # vendored Mini-RAG engine (pure stdlib)
 
 DEFAULT_MIN_SCORE = 0.16  # tuned via evals.py (a "policy handbook" leaks generic "policy" queries at ~0.13); below this = "not in the document"
@@ -74,7 +75,7 @@ def answer(
 
 if __name__ == "__main__":
     import sys
-    doc = open("finance-handbook.md", encoding="utf-8").read()
+    doc = Path(__file__).with_name("finance-handbook.md").read_text(encoding="utf-8")
     idx = build_index(doc)
     q = " ".join(sys.argv[1:]) or "What are the standard payment terms?"
     r = answer(q, idx)

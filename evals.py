@@ -12,6 +12,7 @@ Run:  python evals.py        (pure stdlib, no API key)
 """
 from __future__ import annotations
 import json, sys
+from pathlib import Path
 import finance_rag
 
 K = 3
@@ -32,8 +33,9 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
-    doc = open("finance-handbook.md", encoding="utf-8").read()
-    data = json.load(open("eval_set.json", encoding="utf-8"))
+    folder = Path(__file__).resolve().parent
+    doc = (folder / "finance-handbook.md").read_text(encoding="utf-8")
+    data = json.loads((folder / "eval_set.json").read_text(encoding="utf-8"))
     idx = finance_rag.build_index(doc)
 
     # --- Retrieval quality (in-scope) ---

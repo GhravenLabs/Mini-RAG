@@ -62,6 +62,8 @@ Pure standard library: `re`, `math`, `collections`, `urllib`. No `pip install` f
 - Run `python evals.py` for the bundled eight retrieval and four refusal examples. These small
   fixture results are not evidence of general accuracy. See [the reviewer quickstart](docs/REVIEWER-QUICKSTART.md)
   for isolated test setup.
+- The finance demo and evaluation script locate their bundled data beside the scripts,
+  so launching them by path from another directory does not load unrelated local files.
 
 ## Real-world version
 For production you'd swap TF-IDF for embeddings + a vector store (e.g. pgvector/Chroma) — but the
