@@ -102,7 +102,9 @@ def ai_answer(query: str, passages: list[str]):
                                           "content-type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
-            return json.load(r)["content"][0]["text"]
+            content = json.load(r)["content"]
+            text = "".join(block["text"] for block in content if block.get("type") == "text")
+            return text if text.strip() else "(AI answer failed: response contained no text)"
     except Exception as e:  # noqa
         return f"(AI answer failed: {e})"
 
