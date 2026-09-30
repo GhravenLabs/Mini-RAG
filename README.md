@@ -57,6 +57,8 @@ Pure standard library: `re`, `math`, `collections`, `urllib`. No `pip install` f
   but a query with no matching passage still receives a refusal.
 - `--ai` sends the question and retrieved passages to an external model API. Use public or synthetic
   documents for the hosted demo; keep confidential documents out of it.
+- Generated answers stopped by a token or context limit are marked incomplete. Partial text is
+  retained for inspection; the tool does not automatically retry or incur another API request.
 - The browser demo may need time to wake up on its hosting service. Local retrieval works without
   a hosted service or API key.
 - Run `python evals.py` for the bundled eight retrieval and four refusal examples. These small

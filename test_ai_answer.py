@@ -32,3 +32,27 @@ def test_ai_answer_without_key_does_not_request(monkeypatch):
     with patch("mini_rag.urllib.request.urlopen") as request:
         assert mini_rag.ai_answer("When is payment due?", ["Net 30"]) is None
     request.assert_not_called()
+
+
+@pytest.mark.parametrize("stop_reason", ["max_tokens", "model_context_window_exceeded"])
+def test_truncated_answer_is_marked_incomplete_without_retry(monkeypatch, stop_reason):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    response = io.BytesIO(json.dumps({
+        "content": [{"type": "text", "text": "Payment is due"}],
+        "stop_reason": stop_reason,
+    }).encode())
+    with patch("mini_rag.urllib.request.urlopen", return_value=response) as request:
+        answer = mini_rag.ai_answer("When is payment due?", ["Net 30"])
+    assert answer.startswith("Payment is due")
+    assert "incomplete" in answer.lower()
+    request.assert_called_once()
+
+
+def test_completed_answer_has_no_truncation_notice(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    response = io.BytesIO(json.dumps({
+        "content": [{"type": "text", "text": "Net 30 [1]."}],
+        "stop_reason": "end_turn",
+    }).encode())
+    with patch("mini_rag.urllib.request.urlopen", return_value=response):
+        assert mini_rag.ai_answer("When?", ["Net 30"]) == "Net 30 [1]."

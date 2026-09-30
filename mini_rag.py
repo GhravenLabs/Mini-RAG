@@ -102,8 +102,12 @@ def ai_answer(query: str, passages: list[str]):
                                           "content-type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
-            content = json.load(r)["content"]
+            response = json.load(r)
+            content = response["content"]
             text = "".join(block["text"] for block in content if block.get("type") == "text")
+            if response.get("stop_reason") in {"max_tokens", "model_context_window_exceeded"}:
+                notice = "(AI answer incomplete: generation reached a token or context limit.)"
+                return f"{text}\n\n{notice}" if text.strip() else notice
             return text if text.strip() else "(AI answer failed: response contained no text)"
     except Exception as e:  # noqa
         return f"(AI answer failed: {e})"
