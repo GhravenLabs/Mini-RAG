@@ -20,6 +20,9 @@ the essentials so the *mechanism* is clear and it runs anywhere with just Python
 keys needed for retrieval.
 
 ## Usage
+Documents must be UTF-8 text. Invalid encoding is reported before indexing; the CLI
+does not silently replace unreadable bytes or modify the original file.
+
 ```bash
 python mini_rag.py handbook.md "what is the return policy?"
 python mini_rag.py handbook.md "do you ship overseas?" --k 2

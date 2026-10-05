@@ -39,3 +39,25 @@ def test_retrieve_positive_k_limits_results():
     vectors, idf = mini_rag.build_index(chunks)
     assert len(mini_rag.retrieve("invoice", chunks, vectors, idf, 1)) == 1
     assert len(mini_rag.retrieve("invoice", chunks, vectors, idf, 10)) == 3
+
+
+def test_invalid_utf8_document_is_rejected_before_indexing(tmp_path, capsys):
+    document = tmp_path / "handbook.md"
+    original = b"Invoice payment is due in \xff days."
+    document.write_bytes(original)
+    with patch("mini_rag.build_index", wraps=mini_rag.build_index) as index, patch("mini_rag.ai_answer", return_value=None) as ai:
+        assert mini_rag.main([str(document), "invoice payment", "--ai"]) == 2
+    output = capsys.readouterr()
+    assert "UTF-8" in output.err
+    assert "Indexed" not in output.out
+    assert "Traceback" not in output.err
+    index.assert_not_called()
+    ai.assert_not_called()
+    assert document.read_bytes() == original
+
+
+def test_valid_unicode_document_still_retrieves(tmp_path, capsys):
+    document = tmp_path / "handbook.md"
+    document.write_text("Café invoices require approval.", encoding="utf-8")
+    assert mini_rag.main([str(document), "café invoices"]) == 0
+    assert "Café invoices" in capsys.readouterr().out
