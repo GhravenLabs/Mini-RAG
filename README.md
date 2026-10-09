@@ -36,8 +36,13 @@ $ python mini_rag.py handbook.md "when can I contact support?" --k 1
 Indexed 6 passages from handbook.md.
 
 Top passages:
-  (0.46) ## Support hours and contact  Customer support is available Monday to Friday, 9am to 6pm...
+  [1] (0.46) ## Support hours and contact  Customer support is available Monday to Friday, 9am to 6pm...
 ```
+
+Passage labels such as `[1]` match the context numbers sent to the optional AI
+answer. They restart for each question and are not permanent document identifiers.
+The CLI shows shortened previews; generated citations still need checking against
+the source document.
 
 ## How it works
 1. **Chunk** the document into passages (blank-line split, short chunks merged).

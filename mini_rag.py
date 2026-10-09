@@ -152,9 +152,9 @@ def main(argv=None):
             print("  No relevant passage found.")
             return
         print("Top passages:")
-        for score, passage in hits:
+        for number, (score, passage) in enumerate(hits, 1):
             snippet = " ".join(passage.split())
-            print(f"  ({score:.2f}) {snippet[:200]}{'…' if len(snippet) > 200 else ''}")
+            print(f"  [{number}] ({score:.2f}) {snippet[:200]}{'…' if len(snippet) > 200 else ''}")
         if args.ai:
             a = ai_answer(q, [p for _, p in hits])
             if a is None:

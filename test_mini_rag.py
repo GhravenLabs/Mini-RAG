@@ -8,6 +8,21 @@ import pytest
 import mini_rag
 
 
+@pytest.mark.parametrize("k", [1, 2])
+def test_displayed_passage_labels_match_ai_context_order(tmp_path, capsys, k):
+    document = tmp_path / "handbook.md"
+    document.write_text("Invoice payment details. " * 8 + "\n\n" + "Invoice approval rules. " * 8, encoding="utf-8")
+    with patch("mini_rag.ai_answer", return_value="Check the evidence [1].") as ai:
+        assert mini_rag.main([str(document), "invoice payment", "--k", str(k), "--ai"]) == 0
+    output = capsys.readouterr().out
+    passages = ai.call_args.args[1]
+    assert len(passages) == k
+    for number, passage in enumerate(passages, 1):
+        line = next(line for line in output.splitlines() if line.startswith(f"  [{number}] ("))
+        assert " ".join(passage.split())[:200] in line
+    assert f"  [{k + 1}] (" not in output
+
+
 @pytest.mark.parametrize("k", [0, -1, -10])
 def test_retrieve_rejects_nonpositive_passage_count(k):
     chunks = ["invoice payment", "invoice overdue", "invoice receipt"]
