@@ -78,13 +78,16 @@ def cosine(a: dict, b: dict) -> float:
     return dot / (na * nb) if na and nb else 0.0
 
 
-def retrieve(query: str, chunks: list[str], vectors, idf, k: int = 3):
+def retrieve(query: str, chunks: list[str], vectors, idf, k: int = 3, *, min_score: float = 0.0):
+    """Rank passages, excluding zero overlap and scores below ``min_score``."""
     if isinstance(k, bool) or not isinstance(k, int) or k < 1:
         raise ValueError("k must be a positive integer")
+    if not math.isfinite(min_score) or not 0 <= min_score <= 1:
+        raise ValueError("min_score must be finite and between 0 and 1")
     qv = vectorize(query, idf)
     scored = sorted(((cosine(qv, v), i) for i, v in enumerate(vectors)),
                     key=lambda x: x[0], reverse=True)
-    return [(score, chunks[i]) for score, i in scored[:k] if score > 0]
+    return [(score, chunks[i]) for score, i in scored[:k] if score > 0 and score >= min_score]
 
 
 def ai_answer(query: str, passages: list[str]):
@@ -118,11 +121,14 @@ def main(argv=None):
     ap.add_argument("document", help="path to a .txt/.md document")
     ap.add_argument("question", nargs="?", help="your question (omit for interactive mode)")
     ap.add_argument("--k", type=int, default=3, help="how many passages to retrieve (default 3)")
+    ap.add_argument("--min-score", type=float, default=0.0, help="minimum similarity, 0 to 1 (default 0)")
     ap.add_argument("--ai", action="store_true", help="also generate a grounded answer (needs ANTHROPIC_API_KEY)")
     ap.add_argument("--json", action="store_true", help="emit one JSON object (requires a question)")
     args = ap.parse_args(argv)
     if args.k < 1:
         ap.error("--k must be a positive integer")
+    if not math.isfinite(args.min_score) or not 0 <= args.min_score <= 1:
+        ap.error("--min-score must be finite and between 0 and 1")
     if args.question is not None and not args.question.strip():
         ap.error("question must contain non-whitespace text; omit it for interactive mode")
     if args.json and args.question is None:
@@ -153,7 +159,7 @@ def main(argv=None):
         print(f"Indexed {len(chunks)} passages from {args.document}.\n")
 
     def answer(q):
-        hits = retrieve(q, chunks, vectors, idf, args.k)
+        hits = retrieve(q, chunks, vectors, idf, args.k, min_score=args.min_score)
         if args.json:
             result = {
                 "document": args.document, "question": q,

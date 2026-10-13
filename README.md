@@ -50,6 +50,10 @@ question, and full passages with citation numbers and similarity scores. No matc
 produces an empty `passages` list. With `--ai`, an `answer` field is included (`null`
 when no answer is available). Errors go to stderr, keeping successful output parseable.
 
+Use `--min-score 0.4` to exclude weak lexical matches (range 0–1). The default
+retains every positive match up to `--k`. This is a similarity filter, not an
+answer-confidence estimate or a guarantee that the passages answer the question.
+
 ## How it works
 1. **Chunk** the document into passages (blank-line split, short chunks merged).
 2. **Index** — build TF-IDF vectors (term frequency × inverse document frequency) per passage.

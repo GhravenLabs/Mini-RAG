@@ -9,6 +9,22 @@ import pytest
 import mini_rag
 
 
+def test_min_score_filters_weak_matches():
+    chunks = ["invoice", "invoice approval payment policy"]
+    vectors, idf = mini_rag.build_index(chunks)
+    assert len(mini_rag.retrieve("invoice", chunks, vectors, idf)) == 2
+    assert mini_rag.retrieve("invoice", chunks, vectors, idf, min_score=0.9) == [(1.0, "invoice")]
+
+
+@pytest.mark.parametrize("score", [-0.1, 1.1, float("nan"), float("inf")])
+def test_min_score_validation_in_api_and_cli(score):
+    with pytest.raises(ValueError, match="min_score"):
+        mini_rag.retrieve("invoice", [], [], {}, min_score=score)
+    with pytest.raises(SystemExit) as error:
+        mini_rag.main(["missing.txt", "invoice", "--min-score", str(score)])
+    assert error.value.code == 2
+
+
 @pytest.mark.parametrize("question, count", [("invoice", 1), ("penguins", 0)])
 def test_json_output_is_parseable_and_contains_full_passages(tmp_path, capsys, question, count):
     document = tmp_path / "handbook.md"
