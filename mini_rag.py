@@ -119,11 +119,14 @@ def main(argv=None):
     ap.add_argument("question", nargs="?", help="your question (omit for interactive mode)")
     ap.add_argument("--k", type=int, default=3, help="how many passages to retrieve (default 3)")
     ap.add_argument("--ai", action="store_true", help="also generate a grounded answer (needs ANTHROPIC_API_KEY)")
+    ap.add_argument("--json", action="store_true", help="emit one JSON object (requires a question)")
     args = ap.parse_args(argv)
     if args.k < 1:
         ap.error("--k must be a positive integer")
     if args.question is not None and not args.question.strip():
         ap.error("question must contain non-whitespace text; omit it for interactive mode")
+    if args.json and args.question is None:
+        ap.error("--json requires a question")
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:  # noqa
@@ -146,10 +149,21 @@ def main(argv=None):
         print("Document contains no readable passages.", file=sys.stderr)
         return 2
     vectors, idf = build_index(chunks)
-    print(f"Indexed {len(chunks)} passages from {args.document}.\n")
+    if not args.json:
+        print(f"Indexed {len(chunks)} passages from {args.document}.\n")
 
     def answer(q):
         hits = retrieve(q, chunks, vectors, idf, args.k)
+        if args.json:
+            result = {
+                "document": args.document, "question": q,
+                "passages": [{"citation": i, "score": score, "text": passage}
+                             for i, (score, passage) in enumerate(hits, 1)],
+            }
+            if args.ai:
+                result["answer"] = ai_answer(q, [p for _, p in hits]) if hits else None
+            print(json.dumps(result, ensure_ascii=False))
+            return
         if not hits:
             print("  No relevant passage found.")
             return

@@ -26,6 +26,7 @@ does not silently replace unreadable bytes or modify the original file.
 ```bash
 python mini_rag.py handbook.md "what is the return policy?"
 python mini_rag.py handbook.md "do you ship overseas?" --k 2
+python mini_rag.py handbook.md "return policy" --json > results.json
 python mini_rag.py handbook.md                      # interactive Q&A loop
 python mini_rag.py handbook.md "how long is the warranty?" --ai   # grounded answer (needs ANTHROPIC_API_KEY)
 ```
@@ -43,6 +44,11 @@ Passage labels such as `[1]` match the context numbers sent to the optional AI
 answer. They restart for each question and are not permanent document identifiers.
 The CLI shows shortened previews; generated citations still need checking against
 the source document.
+
+`--json` requires a question and emits a single JSON object containing the document,
+question, and full passages with citation numbers and similarity scores. No matches
+produces an empty `passages` list. With `--ai`, an `answer` field is included (`null`
+when no answer is available). Errors go to stderr, keeping successful output parseable.
 
 ## How it works
 1. **Chunk** the document into passages (blank-line split, short chunks merged).

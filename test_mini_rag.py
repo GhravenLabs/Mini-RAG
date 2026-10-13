@@ -1,4 +1,5 @@
 import subprocess
+import json
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -6,6 +7,27 @@ from unittest.mock import patch
 import pytest
 
 import mini_rag
+
+
+@pytest.mark.parametrize("question, count", [("invoice", 1), ("penguins", 0)])
+def test_json_output_is_parseable_and_contains_full_passages(tmp_path, capsys, question, count):
+    document = tmp_path / "handbook.md"
+    passage = "Invoice approval policy. " * 20
+    document.write_text(passage, encoding="utf-8")
+    assert mini_rag.main([str(document), question, "--json"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["question"] == question
+    assert len(result["passages"]) == count
+    if count:
+        assert result["passages"][0]["text"] == passage.strip()
+        assert result["passages"][0]["citation"] == 1
+
+
+def test_json_requires_explicit_question(capsys):
+    with pytest.raises(SystemExit) as error:
+        mini_rag.main(["missing.txt", "--json"])
+    assert error.value.code == 2
+    assert "--json requires a question" in capsys.readouterr().err
 
 
 def test_interactive_ctrl_c_exits_cleanly(tmp_path, capsys):
