@@ -8,6 +8,14 @@ import pytest
 import mini_rag
 
 
+def test_interactive_ctrl_c_exits_cleanly(tmp_path, capsys):
+    document = tmp_path / "handbook.md"
+    document.write_text("Invoice approval policy.", encoding="utf-8")
+    with patch("builtins.input", side_effect=KeyboardInterrupt):
+        assert mini_rag.main([str(document)]) == 130
+    assert capsys.readouterr().err == "\nInterrupted.\n"
+
+
 @pytest.mark.parametrize("content, expected", [("", 2), ("Invoice approval policy.", 0)])
 def test_utf8_bom_is_not_treated_as_document_content(tmp_path, capsys, content, expected):
     document = tmp_path / "export.txt"

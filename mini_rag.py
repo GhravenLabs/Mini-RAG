@@ -173,6 +173,9 @@ def main(argv=None):
                 q = input("\n? ").strip()
             except EOFError:
                 break
+            except KeyboardInterrupt:
+                print("\nInterrupted.", file=sys.stderr)
+                return 130
             if not q:
                 break
             answer(q)
