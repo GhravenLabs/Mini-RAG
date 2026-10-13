@@ -133,7 +133,7 @@ def main(argv=None):
         print(f"No such file: {args.document}", file=sys.stderr)
         return 2
     try:
-        with open(args.document, encoding="utf-8") as document:
+        with open(args.document, encoding="utf-8-sig") as document:
             doc = document.read()
     except UnicodeDecodeError:
         print(f"Could not read document '{args.document}': save it as valid UTF-8 text.", file=sys.stderr)

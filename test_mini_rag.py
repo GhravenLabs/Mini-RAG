@@ -8,6 +8,17 @@ import pytest
 import mini_rag
 
 
+@pytest.mark.parametrize("content, expected", [("", 2), ("Invoice approval policy.", 0)])
+def test_utf8_bom_is_not_treated_as_document_content(tmp_path, capsys, content, expected):
+    document = tmp_path / "export.txt"
+    document.write_text(content, encoding="utf-8-sig")
+    assert mini_rag.main([str(document), "invoice"]) == expected
+    output = capsys.readouterr()
+    assert "\ufeff" not in output.out
+    if not content:
+        assert "no readable passages" in output.err
+
+
 @pytest.mark.parametrize("question", ["", "   ", "\t\n"])
 def test_cli_rejects_explicit_blank_question_without_entering_interactive_mode(tmp_path, capsys, question):
     document = tmp_path / "handbook.md"
