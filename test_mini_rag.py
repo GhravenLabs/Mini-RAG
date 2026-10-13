@@ -8,6 +8,20 @@ import pytest
 import mini_rag
 
 
+@pytest.mark.parametrize("question", ["", "   ", "\t\n"])
+def test_cli_rejects_explicit_blank_question_without_entering_interactive_mode(tmp_path, capsys, question):
+    document = tmp_path / "handbook.md"
+    document.write_text("Invoice policy", encoding="utf-8")
+    with patch("builtins.input", return_value="") as prompt:
+        with pytest.raises(SystemExit) as exc:
+            mini_rag.main([str(document), question])
+    assert exc.value.code == 2
+    prompt.assert_not_called()
+    output = capsys.readouterr()
+    assert "question must contain non-whitespace text" in output.err
+    assert "Indexed" not in output.out
+
+
 @pytest.mark.parametrize("k", [1, 2])
 def test_displayed_passage_labels_match_ai_context_order(tmp_path, capsys, k):
     document = tmp_path / "handbook.md"

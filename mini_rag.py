@@ -122,6 +122,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.k < 1:
         ap.error("--k must be a positive integer")
+    if args.question is not None and not args.question.strip():
+        ap.error("question must contain non-whitespace text; omit it for interactive mode")
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:  # noqa
