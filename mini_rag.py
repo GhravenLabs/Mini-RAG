@@ -19,9 +19,11 @@ import math
 import os
 import re
 import sys
+import tempfile
 import unicodedata
 import urllib.request
 from collections import Counter
+from pathlib import Path
 
 STOP = set("a an the and or of to in on for is are was were be been being it its this that "
            "with as at by from we you your our i if how do does can will".split())
@@ -118,6 +120,21 @@ def ai_answer(query: str, passages: list[str]):
         return f"(AI answer failed: {e})"
 
 
+def write_text_atomic(path: str, content: str) -> None:
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent,
+                                         prefix=".mini-rag-", delete=False) as output:
+            temporary = Path(output.name)
+            output.write(content)
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Tiny RAG retriever over a local document.")
     ap.add_argument("document", help="path to a .txt/.md document")
@@ -126,6 +143,7 @@ def main(argv=None):
     ap.add_argument("--min-score", type=float, default=0.0, help="minimum similarity, 0 to 1 (default 0)")
     ap.add_argument("--ai", action="store_true", help="also generate a grounded answer (needs ANTHROPIC_API_KEY)")
     ap.add_argument("--json", action="store_true", help="emit one JSON object (requires a question)")
+    ap.add_argument("--out", help="write --json output atomically to a UTF-8 file")
     args = ap.parse_args(argv)
     if args.k < 1:
         ap.error("--k must be a positive integer")
@@ -135,6 +153,10 @@ def main(argv=None):
         ap.error("question must contain non-whitespace text; omit it for interactive mode")
     if args.json and args.question is None:
         ap.error("--json requires a question")
+    if args.out and not args.json:
+        ap.error("--out requires --json")
+    if args.out and os.path.abspath(args.out) == os.path.abspath(args.document):
+        ap.error("--out must not overwrite the source document")
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:  # noqa
@@ -170,7 +192,15 @@ def main(argv=None):
             }
             if args.ai:
                 result["answer"] = ai_answer(q, [p for _, p in hits]) if hits else None
-            print(json.dumps(result, ensure_ascii=False))
+            serialized = json.dumps(result, ensure_ascii=False)
+            if args.out:
+                try:
+                    write_text_atomic(args.out, serialized + "\n")
+                except OSError as error:
+                    print(f"Could not write JSON output '{args.out}': {error}", file=sys.stderr)
+                    return False
+            else:
+                print(serialized)
             return
         if not hits:
             print("  No relevant passage found.")
@@ -187,7 +217,8 @@ def main(argv=None):
                 print("\nAnswer:\n  " + a.replace("\n", "\n  "))
 
     if args.question:
-        answer(args.question)
+        if answer(args.question) is False:
+            return 2
     else:
         print("Interactive mode — ask a question (blank line to quit).")
         while True:

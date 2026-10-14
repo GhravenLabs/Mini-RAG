@@ -27,6 +27,7 @@ does not silently replace unreadable bytes or modify the original file.
 python mini_rag.py handbook.md "what is the return policy?"
 python mini_rag.py handbook.md "do you ship overseas?" --k 2
 python mini_rag.py handbook.md "return policy" --json > results.json
+python mini_rag.py handbook.md "return policy" --json --out results.json
 python mini_rag.py handbook.md                      # interactive Q&A loop
 python mini_rag.py handbook.md "how long is the warranty?" --ai   # grounded answer (needs ANTHROPIC_API_KEY)
 ```
@@ -53,6 +54,8 @@ when no answer is available). Errors go to stderr, keeping successful output par
 Use `--min-score 0.4` to exclude weak lexical matches (range 0–1). The default
 retains every positive match up to `--k`. This is a similarity filter, not an
 answer-confidence estimate or a guarantee that the passages answer the question.
+`--out` requires `--json` and atomically writes UTF-8 output, preserving an existing
+report if writing fails. It refuses to overwrite the source document.
 
 ## How it works
 1. **Chunk** the document into passages (blank-line split, short chunks merged).

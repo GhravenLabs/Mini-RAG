@@ -52,6 +52,28 @@ def test_json_requires_explicit_question(capsys):
     assert "--json requires a question" in capsys.readouterr().err
 
 
+def test_json_output_can_be_written_atomically(tmp_path, capsys):
+    document = tmp_path / "handbook.md"
+    output = tmp_path / "reports" / "result.json"
+    document.write_text("Invoice approval policy.", encoding="utf-8")
+    assert mini_rag.main([str(document), "invoice", "--json", "--out", str(output)]) == 0
+    assert capsys.readouterr().out == ""
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert result["passages"][0]["citation"] == 1
+    assert list(output.parent.iterdir()) == [output]
+
+
+def test_json_output_cannot_overwrite_source(tmp_path, capsys):
+    document = tmp_path / "handbook.md"
+    original = "Invoice approval policy."
+    document.write_text(original, encoding="utf-8")
+    with pytest.raises(SystemExit) as error:
+        mini_rag.main([str(document), "invoice", "--json", "--out", str(document)])
+    assert error.value.code == 2
+    assert document.read_text() == original
+    assert "must not overwrite" in capsys.readouterr().err
+
+
 def test_interactive_ctrl_c_exits_cleanly(tmp_path, capsys):
     document = tmp_path / "handbook.md"
     document.write_text("Invoice approval policy.", encoding="utf-8")
