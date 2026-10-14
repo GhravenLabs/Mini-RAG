@@ -16,6 +16,12 @@ def test_min_score_filters_weak_matches():
     assert mini_rag.retrieve("invoice", chunks, vectors, idf, min_score=0.9) == [(1.0, "invoice")]
 
 
+@pytest.mark.parametrize("vectors", [[], [{"invoice": 1.0}, {"extra": 1.0}]])
+def test_retrieve_rejects_stale_or_mismatched_index(vectors):
+    with pytest.raises(ValueError, match="same length"):
+        mini_rag.retrieve("invoice", ["invoice policy"], vectors, {"invoice": 1.0})
+
+
 @pytest.mark.parametrize("score", [-0.1, 1.1, float("nan"), float("inf")])
 def test_min_score_validation_in_api_and_cli(score):
     with pytest.raises(ValueError, match="min_score"):

@@ -84,6 +84,8 @@ def retrieve(query: str, chunks: list[str], vectors, idf, k: int = 3, *, min_sco
         raise ValueError("k must be a positive integer")
     if not math.isfinite(min_score) or not 0 <= min_score <= 1:
         raise ValueError("min_score must be finite and between 0 and 1")
+    if len(vectors) != len(chunks):
+        raise ValueError("vectors and chunks must have the same length")
     qv = vectorize(query, idf)
     scored = sorted(((cosine(qv, v), i) for i, v in enumerate(vectors)),
                     key=lambda x: x[0], reverse=True)
