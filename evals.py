@@ -11,7 +11,7 @@ scores the demo the way you'd score any real RAG system:
 Run:  python evals.py        (pure stdlib, no API key)
 """
 from __future__ import annotations
-import json, sys
+import json, re, sys
 from pathlib import Path
 import finance_rag
 
@@ -20,10 +20,15 @@ MIN_SCORE = finance_rag.DEFAULT_MIN_SCORE
 
 
 def _hit_rank(passages, keywords):
-    """1-based rank of the first retrieved passage containing ANY expected keyword, else 0."""
+    """1-based rank of the first passage containing an expected whole word/phrase, else 0."""
     for i, (_score, text) in enumerate(passages, start=1):
-        low = text.lower()
-        if any(kw.lower() in low for kw in keywords):
+        folded = text.casefold()
+        if any(
+            keyword.strip() and re.search(
+                rf"(?<!\w){re.escape(keyword.casefold().strip())}(?!\w)", folded
+            )
+            for keyword in keywords
+        ):
             return i
     return 0
 
